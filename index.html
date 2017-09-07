@@ -1,0 +1,82 @@
+<html>
+  <head>
+    <title>Chat</title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <style type = "text/css">
+      body {
+        margin: 0;
+        font-size: 28px;
+      }
+
+      .panel {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        background: #e2e2e2;
+      }
+
+      input {
+        font-size: inherit;
+        width: 100%;
+      }
+
+      .inputs {
+        display: flex;
+      }
+
+      .input-left {
+        max-width: 20%;
+        padding-right: 0.5em;
+      }
+
+      .input-left, .input-right {
+        flex-grow: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div id = "messages">
+      <p align = "center" id = "greeting">Добро пожаловать!</p>
+    </div>
+    <div class = "panel">
+      <form onsubmit="sendMessage(this.nickname.value, this.message.value); this.message.value=''; return false;">
+        <div class = "inputs">
+            <div class = "input-left">
+              <input name = "nickname" placeholder = "nickname" type = "text" autofocus = "" autocomplete="off">
+            </div>
+            <div class = "input-right">
+                <input name = "message" placeholder = "message" type = "text" autocomplete="off">
+            </div>
+            <input type = "submit" style="display: none">
+        </div>
+      </form>
+    </div>
+
+    <script type="text/javascript">
+      const socket = io({transports: ['websocket']});
+      let messagesContainer = document.getElementById('messages');
+
+      socket.on('message', function(data) {
+        renderMessage(data);
+      })
+
+      function sendMessage (nickname, message) {
+        if (nickname && message) {
+          socket.emit('message', {nickname: nickname, message: message});
+          renderMessage({nickname: nickname, message: message});
+        }
+      }
+
+      function renderMessage(data) {
+        let div = document.createElement('DIV');
+        div.innerHTML = '<span><strong>' + data.nickname + ':</strong> ' + data.message + '</span>';
+        messagesContainer.insertBefore(div, messagesContainer.firstChild);
+        document.getElementById('greeting').style.display = 'none';
+      }
+    </script>
+  </body>
+</html>
